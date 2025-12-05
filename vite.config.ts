@@ -8,20 +8,22 @@ export default defineConfig({
         react(),
         VitePWA({
             registerType: 'autoUpdate',
-            includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+            includeAssets: ['favicon.ico', 'icon.png'],
             manifest: {
-                name: 'Sarvasva',
+                name: 'Sarvasva - Fitness Tracker',
                 short_name: 'Sarvasva',
-                description: 'Personal Life Tracker for Sarvasva',
-                theme_color: '#ffffff',
+                description: 'Personalized Lifestyle & Fitness Tracker',
+                theme_color: '#6366f1',
+                background_color: '#020617',
+                display: 'standalone',
                 icons: [
                     {
-                        src: 'pwa-192x192.png',
+                        src: 'icon.png',
                         sizes: '192x192',
                         type: 'image/png'
                     },
                     {
-                        src: 'pwa-512x512.png',
+                        src: 'icon.png',
                         sizes: '512x512',
                         type: 'image/png'
                     }
