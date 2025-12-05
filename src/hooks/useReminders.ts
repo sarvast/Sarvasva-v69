@@ -9,24 +9,31 @@ export function useReminders() {
     useEffect(() => {
         if ('Notification' in window) {
             setPermission(Notification.permission);
+        } else {
+            setPermission('denied');
         }
     }, []);
 
     const requestPermission = async () => {
         if ('Notification' in window) {
-            const result = await Notification.requestPermission();
-            setPermission(result);
-            if (result === 'granted') {
-                new Notification('🔥 Sarvasva Active', {
-                    body: 'Ready to track your transformation! Stay consistent, stay strong.',
-                    icon: '/icon.png'
-                });
+            try {
+                const result = await Notification.requestPermission();
+                setPermission(result);
+                if (result === 'granted') {
+                    new Notification('🔥 Sarvasva Active', {
+                        body: 'Ready to track your transformation! Stay consistent, stay strong.',
+                        icon: '/icon.png'
+                    });
+                }
+            } catch (error) {
+                console.error('Notification permission error:', error);
+                setPermission('denied');
             }
         }
     };
 
     useEffect(() => {
-        if (permission !== 'granted' || !dailyLog) return;
+        if (permission !== 'granted' || !dailyLog || !('Notification' in window)) return;
 
         const checkReminders = () => {
             const now = new Date();
@@ -48,18 +55,22 @@ export function useReminders() {
 
                 // Only notify if tasks are incomplete
                 if (remainingSteps > 2000 || remainingWater > 1000 || !dailyLog.workout_done) {
-                    let message = '⚠️ You\'re falling behind! ';
-                    if (remainingSteps > 2000) message += `${remainingSteps} steps pending. `;
-                    if (remainingWater > 1000) message += `${remainingWater}ml water needed. `;
-                    if (!dailyLog.workout_done) message += 'Workout not done. ';
-                    message += 'Get back on track NOW!';
-                    
-                    new Notification('🚨 Not On Track!', {
-                        body: message,
-                        icon: '/icon.png',
-                        requireInteraction: true
-                    });
-                    setLastNotifiedHour(hour);
+                    try {
+                        let message = '⚠️ You\'re falling behind! ';
+                        if (remainingSteps > 2000) message += `${remainingSteps} steps pending. `;
+                        if (remainingWater > 1000) message += `${remainingWater}ml water needed. `;
+                        if (!dailyLog.workout_done) message += 'Workout not done. ';
+                        message += 'Get back on track NOW!';
+                        
+                        new Notification('🚨 Not On Track!', {
+                            body: message,
+                            icon: '/icon.png',
+                            requireInteraction: true
+                        });
+                        setLastNotifiedHour(hour);
+                    } catch (error) {
+                        console.error('Notification error:', error);
+                    }
                 }
             }
 
@@ -84,12 +95,16 @@ export function useReminders() {
                     impactMsg = "Solid day, Sarvasva! You're getting closer to 80kg. Keep this energy tomorrow!";
                 }
 
-                new Notification(title, {
-                    body: impactMsg,
-                    icon: '/icon.png',
-                    requireInteraction: true // Keep it open until user dismisses because it's "badi notification"
-                });
-                setLastNotifiedHour(hour);
+                try {
+                    new Notification(title, {
+                        body: impactMsg,
+                        icon: '/icon.png',
+                        requireInteraction: true
+                    });
+                    setLastNotifiedHour(hour);
+                } catch (error) {
+                    console.error('End of day notification error:', error);
+                }
             }
         };
 
