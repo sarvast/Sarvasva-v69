@@ -20,7 +20,7 @@ interface SarvasvaContextType {
     timelineWeeks: number;
     addSteps: (count: number) => void;
     addWater: (ml: number) => void;
-    addFood: (calories: number, name: string) => void;
+    addFood: (calories: number) => void;
     addFoodToDb: (name: string, calories: number) => Promise<void>;
     toggleWorkout: () => void;
     logAiHours: (hours: number) => void;

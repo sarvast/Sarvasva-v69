@@ -11,7 +11,6 @@ export function Goals() {
     const bmi = (metrics.STARTING_WEIGHT_KG / (heightM * heightM)).toFixed(1);
 
     // Weight Lost Placeholder (real app would track this over time)
-    const weightLost = 0;
 
     return (
         <div className="space-y-4 animate-in fade-in duration-700">
