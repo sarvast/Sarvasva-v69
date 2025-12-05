@@ -16,20 +16,7 @@ function AppContent() {
     const { isOnboarded, completeOnboarding } = useSarvasva();
     useNativeApp();
     
-    useEffect(() => {
-        // Prevent zoom on double tap
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', (event) => {
-            const now = (new Date()).getTime();
-            if (now - lastTouchEnd <= 300) {
-                event.preventDefault();
-            }
-            lastTouchEnd = now;
-        }, false);
-        
-        // Prevent context menu on long press
-        document.addEventListener('contextmenu', (e) => e.preventDefault());
-    }, []);
+
 
     if (!isOnboarded) {
         return <Onboarding onComplete={completeOnboarding} />;

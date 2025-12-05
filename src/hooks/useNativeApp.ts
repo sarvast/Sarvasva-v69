@@ -16,10 +16,7 @@ export function useNativeApp() {
         window.addEventListener('load', hideAddressBar);
         window.addEventListener('orientationchange', hideAddressBar);
         
-        // Prevent bounce scrolling on iOS
-        document.addEventListener('touchmove', (e) => {
-            if ((e as any).scale !== 1) e.preventDefault();
-        }, { passive: false });
+
 
         return () => {
             window.removeEventListener('load', hideAddressBar);
