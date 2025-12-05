@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@supports (padding: env(safe-area-inset-bottom)) {
+    .pb-safe {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .safe-area-inset-bottom {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .safe-bottom {
+        padding-bottom: calc(6rem + env(safe-area-inset-bottom));
+    }
+}
+
+@layer base {
+    * {
+        -webkit-tap-highlight-color: transparent;
+        box-sizing: border-box;
+    }
+
+    html {
+        height: 100%;
+        overflow-x: hidden;
+        -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+        @apply bg-slate-950 text-slate-100 antialiased;
+        height: 100%;
+        overflow-x: hidden;
+        position: relative;
+        background-image:
+            radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 25%),
+            radial-gradient(circle at 85% 30%, rgba(236, 72, 153, 0.15) 0%, transparent 25%);
+        background-attachment: fixed;
+        touch-action: pan-y;
+    }
+
+    #root {
+        height: 100%;
+        overflow-x: hidden;
+    }
+}
+
+@layer components {
+    .glass-card {
+        @apply backdrop-blur-xl rounded-2xl shadow-glass;
+        background-color: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .glass-input {
+        @apply bg-black/20 rounded-xl px-4 py-3 placeholder:text-slate-500 focus:outline-none focus:ring-1 transition-all;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        -webkit-appearance: none;
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+
+    .text-brand {
+        @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-primary to-brand-secondary;
+    }
+}

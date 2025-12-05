@@ -1,0 +1,22 @@
+{
+    "name": "Sarvasva Transformation",
+    "short_name": "Sarvasva",
+    "description": "Personalized Lifestyle & Fitness Tracker",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#020617",
+    "theme_color": "#0ea5e9",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "/vite.svg",
+            "sizes": "192x192",
+            "type": "image/svg+xml"
+        },
+        {
+            "src": "/vite.svg",
+            "sizes": "512x512",
+            "type": "image/svg+xml"
+        }
+    ]
+}
