@@ -105,7 +105,7 @@ export function Dashboard() {
                         <ProgressBar progress={(dailyLog.steps / userProfile.stepGoal) * 100} color="bg-brand-secondary" height={4} />
                     </div>
                     <div className="flex gap-2">
-                        {supported && permission === 'prompt' && (
+                        {supported && !isTracking && (
                             <Button 
                                 size="sm" 
                                 variant="primary" 
