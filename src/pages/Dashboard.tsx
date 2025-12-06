@@ -3,11 +3,12 @@ import { getGreetings } from '../lib/constants';
 import { GlassCard } from '../components/ui/GlassCard';
 import { Button } from '../components/ui/Button';
 import { ProgressBar } from '../components/ui/ProgressBar';
+import { StreakCard } from '../components/StreakCard';
 import { useStepTracker } from '../hooks/useStepTracker';
 import { Footprints, Droplets, Flame, Smartphone } from 'lucide-react';
 
 export function Dashboard() {
-    const { dailyLog, userProfile, metrics, timelineWeeks, addSteps, addWater, error } = useSarvasva();
+    const { dailyLog, userProfile, metrics, timelineWeeks, streak, addSteps, addWater, error } = useSarvasva();
     const { permission, supported, isTracking, toggleTracking } = useStepTracker();
 
     const getGreeting = () => {
@@ -49,6 +50,9 @@ export function Dashboard() {
                     {userProfile.name}
                 </p>
             </div>
+
+            {/* Streak Card */}
+            <StreakCard streak={streak} />
 
             {/* User Metrics Card */}
             <GlassCard className="p-6">

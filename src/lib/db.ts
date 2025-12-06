@@ -170,6 +170,11 @@ export const getExerciseCompletions = async (date: string) => {
     return completions.filter(c => c.date === date);
 };
 
+export const getAllDailyLogs = async () => {
+    const db = await initDB();
+    return db.getAll('daily_logs');
+};
+
 export const clearDatabase = async () => {
     const deleteRequest = indexedDB.deleteDatabase(DB_NAME);
     return new Promise<void>((resolve, reject) => {

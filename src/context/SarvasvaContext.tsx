@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { format } from 'date-fns';
-import { getDailyLog, saveDailyLog, getAllFoodItems, saveFoodItem, getUserSettings, saveUserSettings, UserSettings, getCustomExercises, saveCustomExercise, deleteCustomExercise, CustomExercise, saveExerciseCompletion, getExerciseCompletions, ExerciseCompletion } from '../lib/db';
+import { getDailyLog, saveDailyLog, getAllFoodItems, saveFoodItem, getUserSettings, saveUserSettings, UserSettings, getCustomExercises, saveCustomExercise, deleteCustomExercise, CustomExercise, saveExerciseCompletion, getExerciseCompletions, ExerciseCompletion, getAllDailyLogs } from '../lib/db';
 import { UserProfile, calculateBMR, calculateTDEE, calculateBMI, calculateTimelineWeeks } from '../lib/constants';
 import { getAllDefaultExercises } from '../lib/workout-data';
 
@@ -25,6 +25,7 @@ interface SarvasvaContextType {
     };
     dailyLog: DailyLogState | null;
     timelineWeeks: number;
+    streak: number;
     customExercises: CustomExercise[];
     exerciseCompletions: ExerciseCompletion[];
     addSteps: (count: number) => void;
@@ -56,6 +57,7 @@ export function SarvasvaProvider({ children }: { children: React.ReactNode }) {
     const [isOnboarded, setIsOnboarded] = useState(false);
     const [customExercises, setCustomExercises] = useState<CustomExercise[]>([]);
     const [exerciseCompletions, setExerciseCompletions] = useState<ExerciseCompletion[]>([]);
+    const [streak, setStreak] = useState(0);
     const [error, setError] = useState<string | null>(null);
 
     const today = format(new Date(), 'yyyy-MM-dd');
@@ -113,6 +115,13 @@ export function SarvasvaProvider({ children }: { children: React.ReactNode }) {
             // Load exercise completions for today
             const completions = await getExerciseCompletions(today);
             setExerciseCompletions(completions);
+
+            // Calculate streak
+            if (settings?.profile) {
+                const allLogs = await getAllDailyLogs();
+                const { calculateStreak } = await import('../lib/streak');
+                setStreak(calculateStreak(allLogs, settings.profile));
+            }
         } catch (err: any) {
             console.error("Context Load Error:", err);
             setError("Failed to load data: " + (err.message || 'Unknown DB Error'));
@@ -278,6 +287,7 @@ export function SarvasvaProvider({ children }: { children: React.ReactNode }) {
             metrics,
             dailyLog,
             timelineWeeks,
+            streak,
             customExercises,
             exerciseCompletions,
             addSteps,
