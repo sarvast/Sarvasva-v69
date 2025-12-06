@@ -46,6 +46,7 @@ export interface CustomExercise {
     name: string;
     sets: string;
     dayIndex: number;
+    gifUrl?: string;
     isCompleted?: boolean;
     isDefault?: boolean;
 }
