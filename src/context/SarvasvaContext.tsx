@@ -118,9 +118,18 @@ export function SarvasvaProvider({ children }: { children: React.ReactNode }) {
 
             // Calculate streak
             if (settings?.profile) {
-                const allLogs = await getAllDailyLogs();
-                const { calculateStreak } = await import('../lib/streak');
-                setStreak(calculateStreak(allLogs, settings.profile));
+                try {
+                    const allLogs = await getAllDailyLogs();
+                    const { calculateStreak } = await import('../lib/streak');
+                    const calculatedStreak = calculateStreak(allLogs, settings.profile);
+                    setStreak(calculatedStreak);
+                    console.log('Streak calculated:', calculatedStreak);
+                } catch (err) {
+                    console.error('Streak calculation error:', err);
+                    setStreak(0);
+                }
+            } else {
+                setStreak(0);
             }
         } catch (err: any) {
             console.error("Context Load Error:", err);
