@@ -100,7 +100,15 @@ export function SarvasvaProvider({ children }: { children: React.ReactNode }) {
 
             // Load custom exercises
             const exercises = await getCustomExercises();
-            setCustomExercises(exercises);
+            if (exercises.length === 0) {
+                const defaultExercises = getAllDefaultExercises();
+                for (const exercise of defaultExercises) {
+                    await saveCustomExercise(exercise);
+                }
+                setCustomExercises(await getCustomExercises());
+            } else {
+                setCustomExercises(exercises);
+            }
 
             // Load exercise completions for today
             const completions = await getExerciseCompletions(today);
@@ -240,14 +248,20 @@ export function SarvasvaProvider({ children }: { children: React.ReactNode }) {
     };
 
     const initializeDefaultExercises = async () => {
-        const defaultExercises = getAllDefaultExercises();
-        for (const exercise of defaultExercises) {
+        try {
             const existing = await getCustomExercises();
-            if (!existing.find(e => e.id === exercise.id)) {
-                await saveCustomExercise(exercise);
+            if (existing.length === 0) {
+                const defaultExercises = getAllDefaultExercises();
+                for (const exercise of defaultExercises) {
+                    await saveCustomExercise(exercise);
+                }
+                const updated = await getCustomExercises();
+                setCustomExercises(updated);
+                console.log('Initialized', updated.length, 'exercises');
             }
+        } catch (error) {
+            console.error('Failed to initialize exercises:', error);
         }
-        setCustomExercises(await getCustomExercises());
     };
 
     // Calculate dynamic metrics (use stored values if available, otherwise calculate)
