@@ -2,36 +2,30 @@ import { DailyLog } from './db';
 import { format, subDays, parseISO } from 'date-fns';
 
 export const calculateStreak = (logs: DailyLog[], userProfile: any): number => {
-    if (!logs || logs.length === 0 || !userProfile) return 0;
+    if (!logs.length || !userProfile) return 0;
 
-    try {
-        const sortedLogs = [...logs].sort((a, b) => b.date.localeCompare(a.date));
-        let streak = 0;
-        const currentDate = new Date();
+    const sortedLogs = logs.sort((a, b) => b.date.localeCompare(a.date));
+    let streak = 0;
+    let currentDate = new Date();
 
-        for (let i = 0; i < 365; i++) {
-            const dateStr = format(subDays(currentDate, i), 'yyyy-MM-dd');
-            const log = sortedLogs.find(l => l.date === dateStr);
+    for (let i = 0; i < 365; i++) {
+        const dateStr = format(subDays(currentDate, i), 'yyyy-MM-dd');
+        const log = sortedLogs.find(l => l.date === dateStr);
 
-            if (!log) break;
+        if (!log) break;
 
-            const stepsGoalMet = log.steps >= (userProfile.stepGoal || 10000);
-            const workoutDone = log.workout_done === true;
-            const tdee = userProfile.tdee || 2000;
-            const caloriesDeficit = log.calories_eaten <= tdee;
+        const stepsGoalMet = log.steps >= userProfile.stepGoal;
+        const workoutDone = log.workout_done;
+        const caloriesDeficit = log.calories_eaten <= userProfile.tdee;
 
-            if (stepsGoalMet && workoutDone && caloriesDeficit) {
-                streak++;
-            } else {
-                break;
-            }
+        if (stepsGoalMet && workoutDone && caloriesDeficit) {
+            streak++;
+        } else {
+            break;
         }
-
-        return streak;
-    } catch (error) {
-        console.error('Streak calculation error:', error);
-        return 0;
     }
+
+    return streak;
 };
 
 export const getStreakMotivation = (streak: number): string => {
