@@ -67,10 +67,13 @@ if (!self.define) {
     });
   };
 }
-define(['./workbox-2ae722a1'], (function (workbox) { 'use strict';
+define(['./workbox-fe70c0da'], (function (workbox) { 'use strict';
 
-  self.skipWaiting();
-  workbox.clientsClaim();
+  self.addEventListener('message', event => {
+    if (event.data && event.data.type === 'SKIP_WAITING') {
+      self.skipWaiting();
+    }
+  });
 
   /**
    * The precacheAndRoute() method efficiently caches and responds to
@@ -82,7 +85,7 @@ define(['./workbox-2ae722a1'], (function (workbox) { 'use strict';
     "revision": "3ca0b8505b4bec776b69afdba2768812"
   }, {
     "url": "index.html",
-    "revision": "0.l130fu1p6k8"
+    "revision": "0.9t2s79fciog"
   }], {});
   workbox.cleanupOutdatedCaches();
   workbox.registerRoute(new workbox.NavigationRoute(workbox.createHandlerBoundToURL("index.html"), {
@@ -93,6 +96,15 @@ define(['./workbox-2ae722a1'], (function (workbox) { 'use strict';
     plugins: [new workbox.ExpirationPlugin({
       maxEntries: 10,
       maxAgeSeconds: 31536000
+    })]
+  }), 'GET');
+  workbox.registerRoute(/^https?:\/\/.*(giphy|gymvisual|tenor|jefit|barbend|brave).*\.(gif|webp|jpg|png)$/i, new workbox.CacheFirst({
+    "cacheName": "exercise-gifs-cache",
+    plugins: [new workbox.ExpirationPlugin({
+      maxEntries: 50,
+      maxAgeSeconds: 2592000
+    }), new workbox.CacheableResponsePlugin({
+      statuses: [0, 200]
     })]
   }), 'GET');
 
