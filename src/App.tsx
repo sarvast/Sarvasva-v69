@@ -10,11 +10,23 @@ import { InstallPrompt } from './components/InstallPrompt';
 import { SarvasvaProvider, useSarvasva } from './context/SarvasvaContext';
 // import { useReminders } from './hooks/useReminders';
 import { useNativeApp } from './hooks/useNativeApp';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 function AppContent() {
     const { isOnboarded, completeOnboarding } = useSarvasva();
+    const [isOnline, setIsOnline] = useState(navigator.onLine);
     useNativeApp();
+    
+    useEffect(() => {
+        const handleOnline = () => setIsOnline(true);
+        const handleOffline = () => setIsOnline(false);
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
     
 
 
@@ -30,7 +42,12 @@ function AppContent() {
                     <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-brand-accent/10 blur-[100px] animate-pulse-slow" style={{ animationDelay: '2s' }} />
                 </div>
                 <div className="w-full min-h-screen relative">
-                    <main className="px-4 pt-4 pb-24 relative z-10 w-full max-w-md mx-auto">
+                    {!isOnline && (
+                        <div className="fixed top-0 left-0 right-0 bg-red-600 text-white text-center py-2 text-sm font-semibold z-50">
+                            You are offline
+                        </div>
+                    )}
+                    <main className={`px-4 pb-24 relative z-10 w-full max-w-md mx-auto ${!isOnline ? 'pt-14' : 'pt-4'}`}>
                         <Routes>
                             <Route path="/" element={<Dashboard />} />
                             <Route path="/fitness" element={<Fitness />} />
