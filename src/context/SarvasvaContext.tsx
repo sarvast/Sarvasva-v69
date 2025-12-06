@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { getDailyLog, saveDailyLog, getAllFoodItems, saveFoodItem, getUserSettings, saveUserSettings, UserSettings, getCustomExercises, saveCustomExercise, deleteCustomExercise, CustomExercise, saveExerciseCompletion, getExerciseCompletions, ExerciseCompletion, getAllDailyLogs } from '../lib/db';
+import { calculateStreak } from '../lib/streak';
 import { UserProfile, calculateBMR, calculateTDEE, calculateBMI, calculateTimelineWeeks } from '../lib/constants';
 import { getAllDefaultExercises } from '../lib/workout-data';
 
@@ -119,8 +120,10 @@ export function SarvasvaProvider({ children }: { children: React.ReactNode }) {
             // Calculate streak
             if (settings?.profile) {
                 const allLogs = await getAllDailyLogs();
-                const { calculateStreak } = await import('../lib/streak');
-                setStreak(calculateStreak(allLogs, settings.profile));
+                const streakCount = calculateStreak(allLogs, settings.profile);
+                setStreak(streakCount);
+            } else {
+                setStreak(0);
             }
         } catch (err: any) {
             console.error("Context Load Error:", err);
