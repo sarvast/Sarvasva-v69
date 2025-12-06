@@ -9,7 +9,7 @@ import { Footprints, Droplets, Flame, Smartphone } from 'lucide-react';
 
 export function Dashboard() {
     const { dailyLog, userProfile, metrics, timelineWeeks, streak, addSteps, addWater, error } = useSarvasva();
-    const { permission, supported, isTracking, enableTracking } = useStepTracker((steps) => addSteps(steps));
+    const { requestPermission, permission, isTracking, supported } = useStepTracker((s) => addSteps(s));
 
     const getGreeting = () => {
         if (!userProfile) return 'Welcome!';
@@ -105,11 +105,11 @@ export function Dashboard() {
                         <ProgressBar progress={(dailyLog.steps / userProfile.stepGoal) * 100} color="bg-brand-secondary" height={4} />
                     </div>
                     <div className="flex gap-2">
-                        {supported && !isTracking && (
+                        {supported && permission !== 'granted' && (
                             <Button 
                                 size="sm" 
                                 variant="primary" 
-                                onClick={enableTracking} 
+                                onClick={requestPermission} 
                                 className="flex-1 text-xs py-2 h-7"
                             >
                                 <Smartphone size={12} /> Enable Auto
