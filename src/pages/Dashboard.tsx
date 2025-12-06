@@ -9,7 +9,7 @@ import { Footprints, Droplets, Flame, Smartphone } from 'lucide-react';
 
 export function Dashboard() {
     const { dailyLog, userProfile, metrics, timelineWeeks, streak, addSteps, addWater, error } = useSarvasva();
-    const { permission, supported, isTracking, toggleTracking } = useStepTracker();
+    const { permission, supported, isTracking, enableTracking } = useStepTracker();
 
     const getGreeting = () => {
         if (!userProfile) return 'Welcome!';
@@ -104,23 +104,23 @@ export function Dashboard() {
                         <div className="text-xs text-slate-400">/ {userProfile.stepGoal.toLocaleString()} goal</div>
                         <ProgressBar progress={(dailyLog.steps / userProfile.stepGoal) * 100} color="bg-brand-secondary" height={4} />
                     </div>
-                    <div className="flex gap-1">
-                        {supported && (
+                    <div className="flex gap-2">
+                        {supported && permission === 'prompt' && (
                             <Button 
                                 size="sm" 
-                                variant={permission === 'granted' && isTracking ? "primary" : "secondary"} 
-                                onClick={toggleTracking} 
+                                variant="primary" 
+                                onClick={enableTracking} 
                                 className="flex-1 text-xs py-2 h-7"
                             >
-                                <Smartphone size={12} /> 
-                                {permission === 'granted' ? 
-                                    `${isTracking ? 'Stop' : 'Start'} ${isTracking ? '🟢' : '🔴'}` : 
-                                    'Enable Auto'
-                                }
+                                <Smartphone size={12} /> Enable Auto
                             </Button>
                         )}
-                        <Button size="sm" variant="secondary" onClick={() => addSteps(500)} className="flex-1 text-xs py-2 h-7">+500</Button>
-                        <Button size="sm" variant="secondary" onClick={() => addSteps(1000)} className="flex-1 text-xs py-2 h-7">+1k</Button>
+                        {permission === 'granted' && isTracking && (
+                            <div className="flex-1 text-xs text-success flex items-center justify-center gap-1">
+                                <Smartphone size={12} /> Auto 🟢
+                            </div>
+                        )}
+                        <Button size="sm" variant="secondary" onClick={() => addSteps(500)} className="text-xs py-2 h-7 px-4">+500</Button>
                     </div>
                 </GlassCard>
 

@@ -17,22 +17,14 @@ export function useStepTracker() {
             setSupported(true);
         }
 
-        // Load saved permission
-        const savedPermission = localStorage.getItem(PERMISSION_KEY) as 'granted' | 'denied' | null;
-        if (savedPermission) {
-            setPermission(savedPermission);
-        }
-
         // Load today's steps
         const savedSteps = localStorage.getItem(STORAGE_KEY);
         if (savedSteps) {
             setSteps(parseInt(savedSteps));
         }
 
-        // Auto-start tracking if permission granted
-        if (savedPermission === 'granted') {
-            startStepTracking();
-        }
+        // Auto-request permission and start tracking
+        requestStepAccess();
 
         // Setup daily reset at midnight
         setupDailyReset();
@@ -75,24 +67,38 @@ export function useStepTracker() {
     const requestStepAccess = async () => {
         try {
             if (typeof (DeviceMotionEvent as any).requestPermission === 'function') {
-                // iOS 13+
-                const result = await (DeviceMotionEvent as any).requestPermission();
-                setPermission(result);
-                localStorage.setItem(PERMISSION_KEY, result);
-                
-                if (result === 'granted') {
+                // iOS 13+ - requires user interaction
+                const savedPermission = localStorage.getItem(PERMISSION_KEY);
+                if (savedPermission === 'granted') {
+                    setPermission('granted');
                     startStepTracking();
+                    return;
                 }
+                // Will be called on user interaction
+                setPermission('prompt');
             } else {
-                // Android Chrome
+                // Android Chrome - auto grant
                 setPermission('granted');
                 localStorage.setItem(PERMISSION_KEY, 'granted');
                 startStepTracking();
             }
         } catch (error) {
             console.error('Step permission error:', error);
-            setPermission('denied');
-            localStorage.setItem(PERMISSION_KEY, 'denied');
+        }
+    };
+
+    const enableTracking = async () => {
+        try {
+            if (typeof (DeviceMotionEvent as any).requestPermission === 'function') {
+                const result = await (DeviceMotionEvent as any).requestPermission();
+                setPermission(result);
+                localStorage.setItem(PERMISSION_KEY, result);
+                if (result === 'granted') {
+                    startStepTracking();
+                }
+            }
+        } catch (error) {
+            console.error('Permission error:', error);
         }
     };
 
@@ -100,9 +106,11 @@ export function useStepTracker() {
         if (isTracking) return;
         
         setIsTracking(true);
-        let lastY = 0;
+        let gravity = 9.81;
         let lastStepTime = 0;
         let stepCount = steps;
+        let avgPeak = 1.5;
+        let peakList: number[] = [];
 
         const handleMotion = (event: DeviceMotionEvent) => {
             if (!event.accelerationIncludingGravity) return;
@@ -110,24 +118,32 @@ export function useStepTracker() {
             const { x, y, z } = event.accelerationIncludingGravity;
             if (x === null || y === null || z === null) return;
 
-            // Improved step detection algorithm
-            const totalAcceleration = Math.sqrt(x*x + y*y + z*z);
-            const yDiff = Math.abs(y - lastY);
+            // Calculate magnitude (orientation independent)
+            const magnitude = Math.sqrt(x*x + y*y + z*z);
+
+            // Remove gravity with low-pass filter
+            gravity = 0.9 * gravity + 0.1 * magnitude;
+            const filtered = magnitude - gravity;
+
             const now = Date.now();
 
-            // Step detection: vertical movement + reasonable acceleration + timing
-            if (yDiff > 2 && totalAcceleration > 8 && totalAcceleration < 15) {
-                if (now - lastStepTime > 300) { // Minimum 300ms between steps
+            // Peak detection with dynamic threshold
+            if (filtered > avgPeak * 0.6) {
+                // Valid step: 300-1500ms gap
+                if (now - lastStepTime > 300 && now - lastStepTime < 1500) {
+                    // Update peak averages (rolling window of 5)
+                    peakList.push(filtered);
+                    if (peakList.length > 5) peakList.shift();
+                    avgPeak = peakList.reduce((a, b) => a + b, 0) / peakList.length;
+
+                    lastStepTime = now;
                     stepCount++;
                     setSteps(stepCount);
                     
                     // Save immediately to localStorage
                     localStorage.setItem(STORAGE_KEY, stepCount.toString());
-                    lastStepTime = now;
                 }
             }
-            
-            lastY = y;
         };
 
         window.addEventListener('devicemotion', handleMotion);
@@ -145,28 +161,12 @@ export function useStepTracker() {
         }
     };
 
-    const toggleTracking = () => {
-        if (permission === 'granted') {
-            if (isTracking) {
-                // Stop tracking
-                setIsTracking(false);
-                window.removeEventListener('devicemotion', () => {});
-            } else {
-                // Start tracking
-                startStepTracking();
-            }
-        } else {
-            requestStepAccess();
-        }
-    };
-
     return {
         steps,
         permission,
         supported,
         isTracking,
-        requestStepAccess,
-        syncSteps,
-        toggleTracking
+        enableTracking,
+        syncSteps
     };
 }
