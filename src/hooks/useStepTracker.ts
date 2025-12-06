@@ -13,12 +13,9 @@ export function useStepTracker(onStep?: (steps: number) => void) {
 
     useEffect(() => {
         const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-        if (!isMobile || !("DeviceMotionEvent" in window)) {
-            setSupported(false);
-            return;
-        }
-
-        setSupported(true);
+        setSupported(isMobile && "DeviceMotionEvent" in window);
+        
+        if (!isMobile || !("DeviceMotionEvent" in window)) return;
 
         if (localStorage.getItem("motion_perm") === "granted") {
             setPermission("granted");
@@ -74,12 +71,9 @@ export function useStepTracker(onStep?: (steps: number) => void) {
             avgRef.current = 0.8 * avgRef.current + 0.2 * avg;
 
             const diff = Math.abs(avgRef.current - filtered);
+            const timeSinceLastStep = now - lastStepRef.current;
 
-            if (
-                diff > 1.1 &&
-                now - lastStepRef.current > 350 &&
-                now - lastStepRef.current < 1800
-            ) {
+            if (diff > 1.1 && (lastStepRef.current === 0 || (timeSinceLastStep > 350 && timeSinceLastStep < 1800))) {
                 lastStepRef.current = now;
                 onStep?.(1);
             }
