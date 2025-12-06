@@ -25,10 +25,13 @@ export function Fitness() {
     const isToday = selectedDay === currentDayIndex;
     
     useEffect(() => {
-        if (customExercises.length === 0) {
-            initializeDefaultExercises();
-        }
-    }, [customExercises.length, initializeDefaultExercises]);
+        const init = async () => {
+            if (customExercises.length === 0) {
+                await initializeDefaultExercises();
+            }
+        };
+        init();
+    }, []);
     
     const isExerciseCompleted = (exerciseId: string) => {
         return exerciseCompletions.some(c => c.exerciseId === exerciseId && c.completed);
